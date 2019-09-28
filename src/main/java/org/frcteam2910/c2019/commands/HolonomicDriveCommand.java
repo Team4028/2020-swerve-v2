@@ -26,7 +26,7 @@ public class HolonomicDriveCommand extends Command {
 
         if (reverseRobotOriented) {
             robotOriented = true;
-            translation = translation.rotateBy(Rotation2.fromDegrees(180.0));
+           // translation = translation.rotateBy(Rotation2.fromDegrees(180.0));
         }
 
         Chassis.getInstance().holonomicDrive(translation, rotation, !robotOriented);

@@ -75,6 +75,16 @@ public class Mk2SwerveModule extends SwerveModule {
         canUpdateNotifier.startPeriodic(1.0 / CAN_UPDATE_RATE);
     }
 
+    public Spark getAngleMotor()
+    {
+        return angleMotor;
+    }
+
+    public CANSparkMax getDriveMotor()
+    {
+        return driveMotor;
+    }
+
     @Override
     protected double readAngle() {
         double angle = (1.0 - angleEncoder.getVoltage() / RobotController.getVoltage5V()) * 2.0 * Math.PI + angleOffset;

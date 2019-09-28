@@ -59,7 +59,7 @@ public class VisionTargetCommand extends Command {
 
         Vector2 translation = new Vector2(forward, strafe);
         if (flipRobotOriented) {
-            translation = translation.rotateBy(Rotation2.fromDegrees(180.0));
+            translation = translation.rotateBy(Rotation2.fromDegrees(180));
         }
 
         Chassis.getInstance().holonomicDrive(translation, rotation, false);

@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.frcteam2910.c2019.RobotMap;
 import org.frcteam2910.c2019.commands.HolonomicDriveCommand;
 import org.frcteam2910.c2019.drivers.Mk2SwerveModule;
+import org.frcteam2910.c2019.util.VectorMath;
 import org.frcteam2910.common.control.*;
 import org.frcteam2910.common.drivers.Gyroscope;
 import org.frcteam2910.common.drivers.SwerveModule;
@@ -48,8 +49,9 @@ public class Chassis extends SwerveDrivetrain {
     private static final PidConstants SNAP_ROTATION_CONSTANTS = new PidConstants(0.3, 0.01, 0.0);
 
     private static final Chassis instance = new Chassis();
+    private VectorMath _vectorMath = VectorMath.getInstance();
 
-    private SwerveModule[] swerveModules;
+    private Mk2SwerveModule[] swerveModules;
 
     private HolonomicMotionProfiledTrajectoryFollower follower = new HolonomicMotionProfiledTrajectoryFollower(
             FOLLOWER_TRANSLATION_CONSTANTS,
@@ -78,7 +80,7 @@ public class Chassis extends SwerveDrivetrain {
             backRightAngleOffset = BACK_RIGHT_ANGLE_OFFSET_PRACTICE;
         }
 
-        SwerveModule frontLeftModule = new Mk2SwerveModule(
+        Mk2SwerveModule frontLeftModule = new Mk2SwerveModule(
                 new Vector2( WHEELBASE / 2.0,-TRACKWIDTH / 2.0),
                 frontLeftAngleOffset,
                 new Spark(RobotMap.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR),
@@ -87,7 +89,7 @@ public class Chassis extends SwerveDrivetrain {
         );
         frontLeftModule.setName("Front Left");
 
-        SwerveModule frontRightModule = new Mk2SwerveModule(
+        Mk2SwerveModule frontRightModule = new Mk2SwerveModule(
                 new Vector2(WHEELBASE / 2.0,TRACKWIDTH / 2.0),
                 frontRightAngleOffset,
                 new Spark(RobotMap.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR),
@@ -96,7 +98,7 @@ public class Chassis extends SwerveDrivetrain {
         );
         frontRightModule.setName("Front Right");
 
-        SwerveModule backLeftModule = new Mk2SwerveModule(
+        Mk2SwerveModule backLeftModule = new Mk2SwerveModule(
                 new Vector2(-WHEELBASE / 2.0, -TRACKWIDTH / 2.0),
                 backLeftAngleOffset,
                 new Spark(RobotMap.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR),
@@ -105,7 +107,7 @@ public class Chassis extends SwerveDrivetrain {
         );
         backLeftModule.setName("Back Left");
 
-        SwerveModule backRightModule = new Mk2SwerveModule(
+        Mk2SwerveModule backRightModule = new Mk2SwerveModule(
                 new Vector2(-WHEELBASE / 2.0,TRACKWIDTH / 2.0),
                 backRightAngleOffset,
                 new Spark(RobotMap.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR),
@@ -114,7 +116,8 @@ public class Chassis extends SwerveDrivetrain {
         );
         backRightModule.setName("Back Right");
 
-        swerveModules = new SwerveModule[]{
+        swerveModules = new Mk2SwerveModule[]
+        {
                 frontLeftModule,
                 frontRightModule,
                 backLeftModule,
@@ -132,21 +135,26 @@ public class Chassis extends SwerveDrivetrain {
     }
 
     @Override
-    public void holonomicDrive(Vector2 translation, double rotation, boolean fieldOriented) {
-        synchronized (lock) {
-            this.signal = new HolonomicDriveSignal(translation, rotation, fieldOriented);
+    public void holonomicDrive(Vector2 translation, double rotation, boolean isFieldOriented) 
+    {
+        for(Mk2SwerveModule swerve :swerveModules)
+        {
+            Vector2 velocityVector = _vectorMath.getVelocityVector(swerve, translation, rotation, isFieldOriented);
+            swerve.getDriveMotor().set(_vectorMath.getSpeedCommand(velocityVector));
         }
     }
 
     @Override
-    public synchronized void updateKinematics(double timestamp) {
+    public synchronized void updateKinematics(double timestamp) 
+    {
         super.updateKinematics(timestamp);
 
         double dt = timestamp - lastTimestamp;
         lastTimestamp = timestamp;
 
         double localSnapRotation;
-        synchronized (lock) {
+        synchronized (lock) 
+        {
             localSnapRotation = snapRotation;
         }
 
