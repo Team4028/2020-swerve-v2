@@ -17,7 +17,7 @@ public class Robot extends TimedRobot {
 
     private final SubsystemManager subsystemManager = new SubsystemManager(
             ClimberSubsystem.getInstance(),
-            DrivetrainSubsystem.getInstance(),
+            Chassis.getInstance(),
             CargoGrabberSubsystem.getInstance(),
             CargoArmSubsystem.getInstance(),
             HatchFloorGathererSubsystem.getInstance(),
@@ -27,7 +27,7 @@ public class Robot extends TimedRobot {
 
     private static final OI oi = new OI();
 
-    private AutonomousTrajectories autonomousTrajectories = new AutonomousTrajectories(DrivetrainSubsystem.CONSTRAINTS);
+    private AutonomousTrajectories autonomousTrajectories = new AutonomousTrajectories(Chassis.CONSTRAINTS);
     private AutonomousSelector autonomousSelector = new AutonomousSelector(autonomousTrajectories);
 
     private Command autonomousCommand = null;

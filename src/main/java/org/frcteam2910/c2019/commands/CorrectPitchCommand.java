@@ -3,7 +3,7 @@ package org.frcteam2910.c2019.commands;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import org.frcteam2910.c2019.subsystems.CargoArmSubsystem;
-import org.frcteam2910.c2019.subsystems.DrivetrainSubsystem;
+import org.frcteam2910.c2019.subsystems.Chassis;
 import org.frcteam2910.common.drivers.SwerveModule;
 
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class CorrectPitchCommand extends Command {
         this.pitchOnlyDown = pitchOnlyDown;
 
         // Find all the swerve modules which are in the front and add them to the list
-        for (SwerveModule module : DrivetrainSubsystem.getInstance().getSwerveModules()) {
+        for (SwerveModule module : Chassis.getInstance().getSwerveModules()) {
             if (module.getModulePosition().x > 0.0) {
                 frontModules.add(module);
             }

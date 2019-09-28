@@ -13,7 +13,7 @@ import org.frcteam2910.c2019.autonomous.AutonomousSelector;
 import org.frcteam2910.c2019.commands.*;
 import org.frcteam2910.c2019.subsystems.CargoArmSubsystem;
 import org.frcteam2910.c2019.subsystems.CargoGrabberSubsystem;
-import org.frcteam2910.c2019.subsystems.DrivetrainSubsystem;
+import org.frcteam2910.c2019.subsystems.Chassis;
 import org.frcteam2910.c2019.subsystems.HatchFloorGathererSubsystem;
 import org.frcteam2910.c2019.vision.api.Gamepiece;
 import org.frcteam2910.common.robot.commands.ZeroFieldOrientedCommand;
@@ -64,7 +64,7 @@ public class OI {
         primaryController.getDPadButton(DPadButton.Direction.LEFT).whenPressed(new RetractKickstandCommand());
 
         // Field oriented zero
-        primaryController.getBackButton().whenPressed(new ZeroFieldOrientedCommand(DrivetrainSubsystem.getInstance()));
+        primaryController.getBackButton().whenPressed(new ZeroFieldOrientedCommand(Chassis.getInstance()));
 
         // Climbing
         primaryController.getStartButton().whenPressed(new ConditionalCommand(new OverhangCommand(), new ClimbCommand()) {

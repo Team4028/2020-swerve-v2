@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import org.frcteam2910.c2019.commands.FollowTrajectoryCommand;
-import org.frcteam2910.c2019.subsystems.DrivetrainSubsystem;
+import org.frcteam2910.c2019.subsystems.Chassis;
 import org.frcteam2910.common.control.Trajectory;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.util.Side;
@@ -61,8 +61,8 @@ public class AutonomousSelector {
 
         // Set the gyro angle to the correct starting angle
         group.addSequential(new InstantCommand(() -> {
-            DrivetrainSubsystem.getInstance().getGyroscope().setAdjustmentAngle(
-                    DrivetrainSubsystem.getInstance().getGyroscope().getUnadjustedAngle().rotateBy(startingOrientation)
+            Chassis.getInstance().getGyroscope().setAdjustmentAngle(
+                    Chassis.getInstance().getGyroscope().getUnadjustedAngle().rotateBy(startingOrientation)
             );
         }));
 

@@ -3,7 +3,7 @@ package org.frcteam2910.c2019.commands;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import org.frcteam2910.c2019.Robot;
-import org.frcteam2910.c2019.subsystems.DrivetrainSubsystem;
+import org.frcteam2910.c2019.subsystems.Chassis;
 import org.frcteam2910.c2019.subsystems.VisionSubsystem;
 import org.frcteam2910.c2019.vision.api.Gamepiece;
 import org.frcteam2910.common.control.PidConstants;
@@ -24,7 +24,7 @@ public class VisionTargetCommand extends Command {
         limelight = VisionSubsystem.getInstance().getLimelight(gamepiece);
         flipRobotOriented = gamepiece == Gamepiece.HATCH_PANEL;
 
-        requires(DrivetrainSubsystem.getInstance());
+        requires(Chassis.getInstance());
     }
 
     @Override
@@ -54,7 +54,7 @@ public class VisionTargetCommand extends Command {
         double rotation = Robot.getOi().primaryController.getRightXAxis().get(true);
         if (Robot.getOi().secondaryController.getRightTriggerAxis().get() > 0.1) {
             rotation = 0.0;
-            DrivetrainSubsystem.getInstance().setSnapRotation(0.0);
+            Chassis.getInstance().setSnapRotation(0.0);
         }
 
         Vector2 translation = new Vector2(forward, strafe);
@@ -62,7 +62,7 @@ public class VisionTargetCommand extends Command {
             translation = translation.rotateBy(Rotation2.fromDegrees(180.0));
         }
 
-        DrivetrainSubsystem.getInstance().holonomicDrive(translation, rotation, false);
+        Chassis.getInstance().holonomicDrive(translation, rotation, false);
     }
 
     @Override

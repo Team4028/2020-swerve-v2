@@ -1,7 +1,7 @@
 package org.frcteam2910.c2019.commands;
 
 import edu.wpi.first.wpilibj.command.Command;
-import org.frcteam2910.c2019.subsystems.DrivetrainSubsystem;
+import org.frcteam2910.c2019.subsystems.Chassis;
 import org.frcteam2910.common.drivers.SwerveModule;
 
 public class WaitForFrontWheelsToDriveDistanceCommand extends Command {
@@ -15,9 +15,9 @@ public class WaitForFrontWheelsToDriveDistanceCommand extends Command {
 
     @Override
     protected void initialize() {
-        startingDistances = new double[DrivetrainSubsystem.getInstance().getSwerveModules().length];
+        startingDistances = new double[Chassis.getInstance().getSwerveModules().length];
         for (int i = 0; i < startingDistances.length; i++) {
-            startingDistances[i] = DrivetrainSubsystem.getInstance().getSwerveModules()[i].getCurrentDistance();
+            startingDistances[i] = Chassis.getInstance().getSwerveModules()[i].getCurrentDistance();
         }
     }
 
@@ -26,7 +26,7 @@ public class WaitForFrontWheelsToDriveDistanceCommand extends Command {
         double avgDistance = 0.0;
         int moduleCount = 0;
         for (int i = 0; i < startingDistances.length; i++) {
-            SwerveModule module = DrivetrainSubsystem.getInstance().getSwerveModules()[i];
+            SwerveModule module = Chassis.getInstance().getSwerveModules()[i];
             if (module.getModulePosition().y > 0.0) {
                 double delta = Math.abs(module.getCurrentDistance() - startingDistances[i]);
 

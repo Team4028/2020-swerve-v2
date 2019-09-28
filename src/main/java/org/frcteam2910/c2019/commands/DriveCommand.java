@@ -1,7 +1,7 @@
 package org.frcteam2910.c2019.commands;
 
 import edu.wpi.first.wpilibj.command.Command;
-import org.frcteam2910.c2019.subsystems.DrivetrainSubsystem;
+import org.frcteam2910.c2019.subsystems.Chassis;
 import org.frcteam2910.common.math.Vector2;
 
 public class DriveCommand extends Command {
@@ -14,17 +14,17 @@ public class DriveCommand extends Command {
         this.rotation = rotation;
         this.fieldOriented = fieldOriented;
 
-        requires(DrivetrainSubsystem.getInstance());
+        requires(Chassis.getInstance());
     }
 
     @Override
     protected void initialize() {
-        DrivetrainSubsystem.getInstance().holonomicDrive(translation, rotation, fieldOriented);
+        Chassis.getInstance().holonomicDrive(translation, rotation, fieldOriented);
     }
 
     @Override
     protected void end() {
-        DrivetrainSubsystem.getInstance().holonomicDrive(Vector2.ZERO, 0.0);
+        Chassis.getInstance().holonomicDrive(Vector2.ZERO, 0.0);
     }
 
     @Override

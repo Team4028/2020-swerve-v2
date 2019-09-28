@@ -4,7 +4,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.command.Command;
 import org.frcteam2910.c2019.Robot;
-import org.frcteam2910.c2019.subsystems.DrivetrainSubsystem;
+import org.frcteam2910.c2019.subsystems.Chassis;
 import org.frcteam2910.common.control.Trajectory;
 import org.frcteam2910.common.math.Vector2;
 
@@ -22,19 +22,19 @@ public class FollowTrajectoryCommand extends Command {
     public FollowTrajectoryCommand(Supplier<Trajectory> trajectorySupplier) {
         this.trajectorySupplier = trajectorySupplier;
 
-        requires(DrivetrainSubsystem.getInstance());
+        requires(Chassis.getInstance());
     }
 
     @Override
     protected void initialize() {
         trajectory = trajectorySupplier.get();
-        DrivetrainSubsystem.getInstance().resetKinematics(Vector2.ZERO, Timer.getFPGATimestamp());
-        DrivetrainSubsystem.getInstance().getFollower().follow(trajectory);
+        Chassis.getInstance().resetKinematics(Vector2.ZERO, Timer.getFPGATimestamp());
+        Chassis.getInstance().getFollower().follow(trajectory);
     }
 
     @Override
     protected void end() {
-        DrivetrainSubsystem.getInstance().setSnapRotation(trajectory.calculateSegment(trajectory.getDuration()).rotation.toRadians());
+        Chassis.getInstance().setSnapRotation(trajectory.calculateSegment(trajectory.getDuration()).rotation.toRadians());
 
         new Thread(() -> {
             Robot.getOi().primaryController.getRawJoystick().setRumble(GenericHID.RumbleType.kLeftRumble, 1.0);
@@ -47,12 +47,12 @@ public class FollowTrajectoryCommand extends Command {
 
     @Override
     protected void interrupted() {
-        DrivetrainSubsystem.getInstance().getFollower().cancel();
+        Chassis.getInstance().getFollower().cancel();
     }
 
     @Override
     protected boolean isFinished() {
         // Only finish when the trajectory is completed
-        return DrivetrainSubsystem.getInstance().getFollower().getCurrentTrajectory().isEmpty();
+        return Chassis.getInstance().getFollower().getCurrentTrajectory().isEmpty();
     }
 }
