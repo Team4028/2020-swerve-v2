@@ -10,6 +10,10 @@ public class VectorMath
 {
     public GyroNavX _navX = GyroNavX.getInstance();
     private static VectorMath _instance = new VectorMath();
+
+    double trackWidth = 21.5;
+    double wheelbase= 23.5;
+    double radius = Math.hypot(trackWidth, wheelbase);
     private VectorMath()
     {
     }
@@ -29,6 +33,7 @@ public class VectorMath
         Vector2 finalPositionVector = positionVector.add(translation);
         Vector2 initialpos = positionVector.rotateBy(Rotation2.fromRadians(heading));
         Vector2 outputVector = finalPositionVector.subtract(initialpos);
+
         return outputVector;
 
     }
@@ -40,7 +45,7 @@ public class VectorMath
     
     public double getAngleCommand(Vector2 outputVector)
     {
-        double angle = Math.atan2(outputVector.y, outputVector.x);
+        double angle = -Math.atan2(outputVector.y, outputVector.x);
         return angle;
     }
 

@@ -144,17 +144,18 @@ public class GyroNavX {
 
 	
     public double getYaw() { 
-		if (_isReversed){
-			if(_navXSensor.getYaw()>=0){
-				return _navXSensor.getYaw()-180;
-			}
-			else
-			{
-				return _navXSensor.getYaw()+180;
-			}
-		} else {
-			return _navXSensor.getYaw();
-		} 
+		// if (_isReversed){
+		// 	if(_navXSensor.getYaw()>=0){
+		// 		return _navXSensor.getYaw()-180;
+		// 	}
+		// 	else
+		// 	{
+		// 		return _navXSensor.getYaw()+180;
+		// 	}
+		// } else {
+		// 	return _navXSensor.getYaw();
+		// } 
+		return 0;
 	}
 	
 	public void zeroYaw() { 

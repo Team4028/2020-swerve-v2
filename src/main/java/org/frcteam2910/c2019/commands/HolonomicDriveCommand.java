@@ -1,35 +1,41 @@
 package org.frcteam2910.c2019.commands;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.command.Command;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import org.frcteam2910.c2019.Robot;
 import org.frcteam2910.c2019.subsystems.Chassis;
+import org.frcteam2910.c2019.util.BeakXboxController;
+import org.frcteam2910.c2019.util.BeakXboxController.Thumbstick;
 import org.frcteam2910.common.math.Rotation2;
 import org.frcteam2910.common.math.Vector2;
 
-public class HolonomicDriveCommand extends Command {
-    public HolonomicDriveCommand() {
-        requires(Chassis.getInstance());
+public class HolonomicDriveCommand extends Command 
+{
+    Chassis _chassis = Chassis.getInstance();
+    Thumbstick _leftStick, _rightStick;
+    double forward, strafe, rotation;
+    boolean isFieldOriented;
+    public HolonomicDriveCommand(Thumbstick leftStick, Thumbstick rightStick) 
+    {
+        requires(_chassis);
+        _leftStick=leftStick;
+        _rightStick=rightStick;
     }
 
     @Override
-    protected void execute() {
-        boolean ignoreScalars = Robot.getOi().primaryController.getLeftBumperButton().get();
-
-        double forward = Robot.getOi().primaryController.getLeftYAxis().get(true);
-        double strafe = Robot.getOi().primaryController.getLeftXAxis().get(true);
-        double rotation = Robot.getOi().primaryController.getRightXAxis().get(true, ignoreScalars);
-
-        boolean robotOriented = Robot.getOi().primaryController.getXButton().get();
-        boolean reverseRobotOriented = Robot.getOi().primaryController.getYButton().get();
-
-        Vector2 translation = new Vector2(forward, strafe);
-
-        if (reverseRobotOriented) {
-            robotOriented = true;
-           // translation = translation.rotateBy(Rotation2.fromDegrees(180.0));
-        }
-
-        Chassis.getInstance().holonomicDrive(translation, rotation, !robotOriented);
+    protected void execute() 
+    {
+        forward = _leftStick.getY();
+        strafe = _leftStick.getX();
+        Vector2 translationVector = new Vector2(forward, strafe);
+        rotation = _rightStick.getX();
+        isFieldOriented=true;
+        _chassis.holonomicDrive(translationVector, rotation, isFieldOriented);
+        SmartDashboard.putNumber("Forward", forward);
+        SmartDashboard.putNumber("Strafe", strafe);
+        SmartDashboard.putNumber("Rotation", rotation);
     }
 
     @Override

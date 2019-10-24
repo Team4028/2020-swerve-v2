@@ -2,6 +2,8 @@ package org.frcteam2910.c2019.drivers;
 
 import com.revrobotics.CANEncoder;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.ControlType;
+
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -21,7 +23,7 @@ public class Mk2SwerveModule extends SwerveModule {
 
     private final double angleOffset;
 
-    private Spark angleMotor;
+    private CANSparkMax angleMotor;
     private AnalogInput angleEncoder;
     private CANSparkMax driveMotor;
     private CANEncoder driveEncoder;
@@ -58,7 +60,7 @@ public class Mk2SwerveModule extends SwerveModule {
     private PidController angleController = new PidController(ANGLE_CONSTANTS);
 
     public Mk2SwerveModule(Vector2 modulePosition, double angleOffset,
-                           Spark angleMotor, CANSparkMax driveMotor, AnalogInput angleEncoder) {
+                           CANSparkMax angleMotor, CANSparkMax driveMotor, AnalogInput angleEncoder) {
         super(modulePosition);
         this.angleOffset = angleOffset;
         this.angleMotor = angleMotor;
@@ -75,7 +77,7 @@ public class Mk2SwerveModule extends SwerveModule {
         canUpdateNotifier.startPeriodic(1.0 / CAN_UPDATE_RATE);
     }
 
-    public Spark getAngleMotor()
+    public CANSparkMax getAngleMotor()
     {
         return angleMotor;
     }
@@ -86,7 +88,7 @@ public class Mk2SwerveModule extends SwerveModule {
     }
 
     @Override
-    protected double readAngle() {
+    public double readAngle() {
         double angle = (1.0 - angleEncoder.getVoltage() / RobotController.getVoltage5V()) * 2.0 * Math.PI + angleOffset;
         angle %= 2.0 * Math.PI;
         if (angle < 0.0) {
@@ -135,7 +137,7 @@ public class Mk2SwerveModule extends SwerveModule {
     }
 
     @Override
-    protected void setTargetAngle(double angle) {
+    public void setTargetAngle(double angle) {
         angleController.setSetpoint(angle);
     }
 

@@ -3,6 +3,7 @@ package org.frcteam2910.c2019.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
 import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.frcteam2910.c2019.RobotMap;
@@ -22,8 +23,11 @@ import org.frcteam2910.common.util.HolonomicFeedforward;
 import java.util.Optional;
 
 public class Chassis extends SwerveDrivetrain { 
-    private static final double TRACKWIDTH = 19.5;
+    private static final double TRACKWIDTH = 21.5;
     private static final double WHEELBASE = 23.5;
+    private static final double RADIUS = Math.hypot(TRACKWIDTH, WHEELBASE);
+
+    private static final double errorBound = 0.1;
 
     public static final ITrajectoryConstraint[] CONSTRAINTS = {
             new MaxVelocityConstraint(12.0 * 12.0),
@@ -32,13 +36,15 @@ public class Chassis extends SwerveDrivetrain {
     };
 
     private static final double FRONT_LEFT_ANGLE_OFFSET_COMPETITION = Math.toRadians(-50.00 + 180.0);
-    private static final double FRONT_RIGHT_ANGLE_OFFSET_COMPETITION = Math.toRadians(-284.47 + 180.0);
+    private static final double FRONT_RIGHT_ANGLE_OFFSET_COMPETITION = Math.toRadians(-75+180);
     private static final double BACK_LEFT_ANGLE_OFFSET_COMPETITION = Math.toRadians(-331.52 + 180.0);
     private static final double BACK_RIGHT_ANGLE_OFFSET_COMPETITION = Math.toRadians(-209.22);
     private static final double FRONT_LEFT_ANGLE_OFFSET_PRACTICE = Math.toRadians(-56.53 + 180);
     private static final double FRONT_RIGHT_ANGLE_OFFSET_PRACTICE = Math.toRadians(-109.38 + 180);
     private static final double BACK_LEFT_ANGLE_OFFSET_PRACTICE = Math.toRadians(-4.21 + 180);
     private static final double BACK_RIGHT_ANGLE_OFFSET_PRACTICE = Math.toRadians(-332.17);
+
+    private static final double angleControlP = 0.02;
 
     private static final PidConstants FOLLOWER_TRANSLATION_CONSTANTS = new PidConstants(0.05, 0.01, 0.0);
     private static final PidConstants FOLLOWER_ROTATION_CONSTANTS = new PidConstants(0.2, 0.01, 0.0);
@@ -68,6 +74,8 @@ public class Chassis extends SwerveDrivetrain {
     private HolonomicDriveSignal signal = new HolonomicDriveSignal(Vector2.ZERO, 0.0, false);
     private Trajectory.Segment segment = null;
 
+    private Mk2SwerveModule frswerve;
+
     private Chassis() {
         double frontLeftAngleOffset = FRONT_LEFT_ANGLE_OFFSET_COMPETITION;
         double frontRightAngleOffset = FRONT_RIGHT_ANGLE_OFFSET_COMPETITION;
@@ -80,48 +88,49 @@ public class Chassis extends SwerveDrivetrain {
             backRightAngleOffset = BACK_RIGHT_ANGLE_OFFSET_PRACTICE;
         }
 
-        Mk2SwerveModule frontLeftModule = new Mk2SwerveModule(
-                new Vector2( WHEELBASE / 2.0,-TRACKWIDTH / 2.0),
-                frontLeftAngleOffset,
-                new Spark(RobotMap.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR),
-                new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless),
-                new AnalogInput(RobotMap.DRIVETRAIN_FRONT_LEFT_ANGLE_ENCODER)
-        );
-        frontLeftModule.setName("Front Left");
+        // Mk2SwerveModule frontLeftModule = new Mk2SwerveModule(
+        //         new Vector2( WHEELBASE / 2.0,-TRACKWIDTH / 2.0),
+        //         frontLeftAngleOffset,
+        //         new Spark(RobotMap.DRIVETRAIN_FRONT_LEFT_ANGLE_MOTOR),
+        //         new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_LEFT_DRIVE_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless),
+        //         new AnalogInput(RobotMap.DRIVETRAIN_FRONT_LEFT_ANGLE_ENCODER)
+        // );
+        // frontLeftModule.setName("Front Left");
 
         Mk2SwerveModule frontRightModule = new Mk2SwerveModule(
                 new Vector2(WHEELBASE / 2.0,TRACKWIDTH / 2.0),
                 frontRightAngleOffset,
-                new Spark(RobotMap.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR),
+                new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_RIGHT_ANGLE_MOTOR,CANSparkMaxLowLevel.MotorType.kBrushless),
                 new CANSparkMax(RobotMap.DRIVETRAIN_FRONT_RIGHT_DRIVE_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless),
                 new AnalogInput(RobotMap.DRIVETRAIN_FRONT_RIGHT_ANGLE_ENCODER)
         );
         frontRightModule.setName("Front Right");
+        frswerve = frontRightModule;
 
-        Mk2SwerveModule backLeftModule = new Mk2SwerveModule(
-                new Vector2(-WHEELBASE / 2.0, -TRACKWIDTH / 2.0),
-                backLeftAngleOffset,
-                new Spark(RobotMap.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR),
-                new CANSparkMax(RobotMap.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless),
-                new AnalogInput(RobotMap.DRIVETRAIN_BACK_LEFT_ANGLE_ENCODER)
-        );
-        backLeftModule.setName("Back Left");
+        // Mk2SwerveModule backLeftModule = new Mk2SwerveModule(
+        //         new Vector2(-WHEELBASE / 2.0, -TRACKWIDTH / 2.0),
+        //         backLeftAngleOffset,
+        //         new Spark(RobotMap.DRIVETRAIN_BACK_LEFT_ANGLE_MOTOR),
+        //         new CANSparkMax(RobotMap.DRIVETRAIN_BACK_LEFT_DRIVE_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless),
+        //         new AnalogInput(RobotMap.DRIVETRAIN_BACK_LEFT_ANGLE_ENCODER)
+        // );
+        // backLeftModule.setName("Back Left");
 
-        Mk2SwerveModule backRightModule = new Mk2SwerveModule(
-                new Vector2(-WHEELBASE / 2.0,TRACKWIDTH / 2.0),
-                backRightAngleOffset,
-                new Spark(RobotMap.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR),
-                new CANSparkMax(RobotMap.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless),
-                new AnalogInput(RobotMap.DRIVETRAIN_BACK_RIGHT_ANGLE_ENCODER)
-        );
-        backRightModule.setName("Back Right");
+        // Mk2SwerveModule backRightModule = new Mk2SwerveModule(
+        //         new Vector2(-WHEELBASE / 2.0,TRACKWIDTH / 2.0),
+        //         backRightAngleOffset,
+        //         new Spark(RobotMap.DRIVETRAIN_BACK_RIGHT_ANGLE_MOTOR),
+        //         new CANSparkMax(RobotMap.DRIVETRAIN_BACK_RIGHT_DRIVE_MOTOR, CANSparkMaxLowLevel.MotorType.kBrushless),
+        //         new AnalogInput(RobotMap.DRIVETRAIN_BACK_RIGHT_ANGLE_ENCODER)
+        // );
+        // backRightModule.setName("Back Right");
 
         swerveModules = new Mk2SwerveModule[]
         {
-                frontLeftModule,
+               // frontLeftModule,
                 frontRightModule,
-                backLeftModule,
-                backRightModule,
+                // backLeftModule,
+                // backRightModule,
         };
 
         snapRotationController.setInputRange(0.0, 2.0 * Math.PI);
@@ -137,11 +146,30 @@ public class Chassis extends SwerveDrivetrain {
     @Override
     public void holonomicDrive(Vector2 translation, double rotation, boolean isFieldOriented) 
     {
-        for(Mk2SwerveModule swerve :swerveModules)
-        {
-            Vector2 velocityVector = _vectorMath.getVelocityVector(swerve, translation, rotation, isFieldOriented);
-            swerve.getDriveMotor().set(_vectorMath.getSpeedCommand(velocityVector));
-        }
+        double strafe = translation.y;
+        double forward = translation.x;
+
+        double A = strafe - rotation*(WHEELBASE/RADIUS);
+        double B = strafe + rotation*(WHEELBASE/RADIUS);
+        double C = forward - rotation*(TRACKWIDTH/RADIUS);
+        double D = forward + rotation*(TRACKWIDTH/RADIUS);
+        
+        swerveModules[0].getDriveMotor().set(Math.hypot(B, C));
+        swerveModules[0].setTargetAngle(Math.atan2(B,C));
+            
+            // if(swerve == frswerve)
+            // {
+            //     SmartDashboard.putNumber("Velocity Vector Forward", velocityVector.x);
+            //     SmartDashboard.putNumber("Velocity Vector Strafe", velocityVector.y);
+            //     SmartDashboard.putNumber("Velocity Vector Magnitude", _vectorMath.getSpeedCommand(velocityVector));
+            //     SmartDashboard.putNumber("Angle Setpoint", angleSetpoint);
+            //     SmartDashboard.putNumber("CurrentAngle", currentAngle);
+            //     SmartDashboard.putNumber("Error", error);
+            //     SmartDashboard.putNumber("Motor Speed", swerve.getDriveMotor().getAppliedOutput());
+            // }
+            
+
+        
     }
 
     @Override
@@ -243,7 +271,6 @@ public class Chassis extends SwerveDrivetrain {
 
     @Override
     protected void initDefaultCommand() {
-        setDefaultCommand(new HolonomicDriveCommand());
     }
 
     public TrajectoryFollower<HolonomicDriveSignal> getFollower() {

@@ -4,10 +4,11 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.command.Command;
 import edu.wpi.first.wpilibj.command.Scheduler;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import org.frcteam2910.c2019.autonomous.AutonomousSelector;
+// import org.frcteam2910.c2019.autonomous.AutonomousSelector;
 import org.frcteam2910.c2019.autonomous.AutonomousTrajectories;
+import org.frcteam2910.c2019.sensors.GyroNavX;
 import org.frcteam2910.c2019.subsystems.*;
-import org.frcteam2910.c2019.vision.api.Gamepiece;
+//import org.frcteam2910.c2019.vision.api.Gamepiece;
 import org.frcteam2910.common.robot.drivers.Limelight;
 import org.frcteam2910.common.robot.drivers.NavX;
 import org.frcteam2910.common.robot.subsystems.SubsystemManager;
@@ -15,25 +16,25 @@ import org.frcteam2910.common.robot.subsystems.SubsystemManager;
 public class Robot extends TimedRobot {
     private static final double UPDATE_DT = 5e-3; // 5 ms
 
+    GyroNavX _NavX = GyroNavX.getInstance();
     private final SubsystemManager subsystemManager = new SubsystemManager(
-            ClimberSubsystem.getInstance(),
-            Chassis.getInstance(),
-            CargoGrabberSubsystem.getInstance(),
-            CargoArmSubsystem.getInstance(),
-            HatchFloorGathererSubsystem.getInstance(),
-            HatchPlacerSubsystem.getInstance(),
-            VisionSubsystem.getInstance()
+            //ClimberSubsystem.getInstance(),
+            Chassis.getInstance()
+            //CargoGrabberSubsystem.getInstance(),
+            //CargoArmSubsystem.getInstance(),
+            //HatchFloorGathererSubsystem.getInstance(),
+            //HatchPlacerSubsystem.getInstance()
+            //VisionSubsystem.getInstance()
     );
 
-    private static final OI oi = new OI();
+    private static OI oi = OI.getInstance();
 
     private AutonomousTrajectories autonomousTrajectories = new AutonomousTrajectories(Chassis.CONSTRAINTS);
-    private AutonomousSelector autonomousSelector = new AutonomousSelector(autonomousTrajectories);
+    // private AutonomousSelector autonomousSelector = new AutonomousSelector(autonomousTrajectories);
 
     private Command autonomousCommand = null;
 
     public Robot() {
-        oi.bindButtons(autonomousSelector);
     }
 
     public static OI getOi() {
@@ -51,8 +52,8 @@ public class Robot extends TimedRobot {
     public void robotPeriodic() {
 //        subsystemManager.outputToSmartDashboard();
 
-        SmartDashboard.putNumber("Arm Angle",
-                Math.toDegrees(CargoArmSubsystem.getInstance().getCurrentAngle()));
+       // SmartDashboard.putNumber("Arm Angle",
+         //       Math.toDegrees(CargoArmSubsystem.getInstance().getCurrentAngle()));
         SmartDashboard.putNumber("Gyro Pitch",
                 Math.toDegrees(Superstructure.getInstance().getGyroscope().getAxis(NavX.Axis.ROLL)));
         SmartDashboard.putBoolean("Is Competition Bot",
@@ -67,6 +68,7 @@ public class Robot extends TimedRobot {
             autonomousCommand.cancel();
             autonomousCommand = null;
         }
+        _NavX.zeroYaw();
     }
 
     @Override
@@ -76,12 +78,12 @@ public class Robot extends TimedRobot {
 
     @Override
     public void autonomousInit() {
-        if (autonomousCommand != null) {
-            autonomousCommand.cancel();
-        }
+        // if (autonomousCommand != null) {
+        //     autonomousCommand.cancel();
+        // }
 
-        autonomousCommand = autonomousSelector.getCommand();
-        autonomousCommand.start();
+        // autonomousCommand = autonomousSelector.getCommand();
+        // autonomousCommand.start();
     }
 
     @Override
@@ -103,7 +105,7 @@ public class Robot extends TimedRobot {
         boolean calibrationMode = SmartDashboard.getBoolean("Limelight Calibration Mode", false);
 
         Limelight.CamMode mode = calibrationMode ? Limelight.CamMode.VISION : Limelight.CamMode.DRIVER;
-        VisionSubsystem.getInstance().getLimelight(Gamepiece.HATCH_PANEL).setCamMode(mode);
-        VisionSubsystem.getInstance().getLimelight(Gamepiece.CARGO).setCamMode(mode);
+       // VisionSubsystem.getInstance().getLimelight(Gamepiece.HATCH_PANEL).setCamMode(mode);
+    //    VisionSubsystem.getInstance().getLimelight(Gamepiece.CARGO).setCamMode(mode);
     }
 }
